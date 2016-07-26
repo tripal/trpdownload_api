@@ -1,0 +1,193 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function trpdownload_api_menu() {
+  $items = array();
+
+  $items['tripal/download/genotype_matrix/csv'] = array(
+    'title' => 'Download Genotypes: CSV',
+    'page callback' => 'trpdownload_download_page',
+    'page arguments' => array('genotype_matrix','csv', 4),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['tripal/progress/job/%/%'] = array(
+    'title' => t('Tripal Job progress'),
+    'page callback' => 'tripal_job_progress_json',
+    'page arguments' => array(3,4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Register a download type that can be used with this API.
+ * @return
+ *   An associative array of tripal download types to register. The keys on the outer
+ *   array are the machine names of each type, and the values are arrays containing
+ *   information about the type. Each information array should contain the following
+ *   key/value pairs:
+ *    - format_name: a human-readable name of the format to be displayed to the user.
+ *    - functions: an array of functions that will return specific information, etc.
+ *        - generate_file: the name of the function that will generate the file. This
+ *            function will be called by tripal jobs on the command-line.
+ *        - summarize: the name of a function that will provide summary information about
+ *            the file that will be generated.
+ *        - get_filename: a function that will return an informative file name based on
+ *            the arguements that will be used to generate the file.
+ *    - theme: an array of theme functions to use to render specific parts of the file.
+ *        The part of the file to be rendered is the key and the value is the name
+ *        of a theme implementation (ie: key in hook_theme).
+ */
+function hook_register_trpdownload_type() {
+  $types = array();
+
+  return $types;
+}
+
+/**
+ * Retrieve information for a given download type.
+ *
+ * @param $machine_name
+ *   The machine name of the tripal download type to return information on.
+ * @return
+ *   The array supplied in hook_register_trpdownload_type().
+ */
+function trpdownload_get_download_type_info($machine_name) {
+
+  $internal_types = hook_register_trpdownload_type();
+  if (isset($internal_types[$machine_name])) {
+    return $internal_types[$machine_name];
+  }
+
+  $custom_types = module_invoke_all('register_trpdownload_type');
+  if (isset($custom_types[$machine_name])) {
+    return $custom_types[$machine_name];
+  }
+
+  return FALSE;
+}
+
+/**
+ * Return the progress of the specified job
+ * formatted for updating the drupal progress bar.
+ *
+ * @param $type
+ *   The machine name of the tripal download type.
+ * @param $job_id
+ *   The tripal job_id of the job you would like to check progrtess for.
+ * @return
+ *   JSON describing the progress of the specified Tripal job.
+ */
+function tripal_job_progress_json($type, $job_id) {
+  $r = db_query('SELECT * FROM {tripal_jobs} WHERE job_id=:id',
+    array(':id' => $job_id))->fetchObject();
+
+  $progress = array(
+    'percentage' => $r->progress,
+    'message' => $r->status,
+    'file_message' => $r->status,
+    'file_class' => 'file-'.str_replace(' ','-',strtolower($r->status)),
+  );
+
+  // Make the Tripal job messages more specific to the generating of a file.
+  $info = trpdownload_get_download_type_info($type);
+  $function = (isset($info['function']['progress_msg'])) ? $info['function']['progress_msg'] : 'trpdownload_api_get_status_msg';
+  $progress = call_user_func($function, $progress, $r);
+
+  print drupal_json_output($progress);
+  exit();
+}
+
+/**
+ * Implements hook_theme().
+ */
+function trpdownload_api_theme($existing, $type, $theme, $path) {
+  $items = array();
+
+  $items['trpdownload_page'] = array(
+    'template' => 'theme/generic_download_page',
+    'variables' => array('trpdownload_key' => NULL, 'arg1' => NULL, 'arg2' => NULL),
+  );
+
+  return $items;
+}
+
+/**
+ * Simply render the download page template.
+ */
+function trpdownload_download_page($trpdownload_key, $arg1 = NULL, $arg2 = NULL) {
+  $_GET['job_id'] = 5;
+  return theme('trpdownload_page', array('trpdownload_key' => $trpdownload_key, 'arg1' => $arg1, 'arg2' => $arg2));
+}
+
+/**
+ * Determine the status to show to the user.
+ *
+ * @param $job
+ *   An object describing the current state of the job.
+ * @return
+ *   An array describing the status of the job with at least the following two keys:
+ *    - percentage: a whole number percentage (ie: 50 for 50%).
+ *    - message: a string message to the user.
+ *   Other important keys include:
+ *    - file_message: the message displayed on the api-provided download page in the file box.
+ *    - file_class: a class to add to the file box in the api-provided download page.
+ */
+function trpdownload_api_get_status_msg($progress, $job) {
+
+  switch ($job->status) {
+    case 'Waiting':
+      $progress['message'] = 'In Job Queue...';
+      $progress['file_message'] = 'Waiting to generate file.';
+      $progress['file_class'] = 'file-not-ready';
+      break;
+    case 'Error':
+      $progress['message'] = 'Encountered an Error.';
+      $progress['file_message'] = 'Unable to generate file.';
+      $progress['file_class'] = 'file-error';
+      break;
+    case 'Cancelled':
+      $progress['message'] = 'Cancelled by an Administrator.';
+      $progress['file_message'] = 'Unable to generate file.';
+      $progress['file_class'] = 'file-error';
+      break;
+    case 'Completed':
+      $progress['message'] = 'Completed Successfully.';
+      $progress['file_message'] = 'File Generated.';
+      $progress['file_class'] = 'file-ready';
+      break;
+    case 'Running':
+      $progress['message'] = 'Generating file...';
+      $progress['file_message'] = 'Generating file.';
+      $progress['file_class'] = 'file-not-ready';
+      break;
+  }
+
+  return $progress;
+}
+
+/**
+ *
+ */
+function never_ending_job($variables, $job_id = NULL) {
+
+  $p = 0;
+  while(TRUE) {
+    print "Sleeping 10\n";
+    sleep(10);
+
+    $p = ($p < 100) ? $p + 10 : 0;
+    print "Progress: $p\n";
+    db_query('UPDATE {tripal_jobs} SET progress=:p WHERE job_id=:id',
+      array(':id' => $job_id, ':p' => $p));
+  }
+}

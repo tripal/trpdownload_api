@@ -1,0 +1,7 @@
+package = Tripal Extensions
+name = Tripal Download API
+description = Provides an api for creating download pages. Uses tripal Jobs to generate files and provides a progress bar to users.
+version = 7.x-0.x
+core = 7.x
+
+dependencies[] = tripal_core

@@ -1,0 +1,42 @@
+Available help:
+  ABORT                            CLUSTER                          DECLARE                          EXPLAIN
+  ALTER AGGREGATE                  COMMENT                          DELETE                           FETCH
+  ALTER COLLATION                  COMMIT                           DISCARD                          GRANT
+  ALTER CONVERSION                 COMMIT PREPARED                  DO                               INSERT
+  ALTER DATABASE                   COPY                             DROP AGGREGATE                   LISTEN
+  ALTER DEFAULT PRIVILEGES         CREATE AGGREGATE                 DROP CAST                        LOAD
+  ALTER DOMAIN                     CREATE CAST                      DROP COLLATION                   LOCK
+  ALTER EVENT TRIGGER              CREATE COLLATION                 DROP CONVERSION                  MOVE
+  ALTER EXTENSION                  CREATE CONVERSION                DROP DATABASE                    NOTIFY
+  ALTER FOREIGN DATA WRAPPER       CREATE DATABASE                  DROP DOMAIN                      PREPARE
+  ALTER FOREIGN TABLE              CREATE DOMAIN                    DROP EVENT TRIGGER               PREPARE TRANSACTION
+  ALTER FUNCTION                   CREATE EVENT TRIGGER             DROP EXTENSION                   REASSIGN OWNED
+  ALTER GROUP                      CREATE EXTENSION                 DROP FOREIGN DATA WRAPPER        REFRESH MATERIALIZED VIEW
+  ALTER INDEX                      CREATE FOREIGN DATA WRAPPER      DROP FOREIGN TABLE               REINDEX
+  ALTER LANGUAGE                   CREATE FOREIGN TABLE             DROP FUNCTION                    RELEASE SAVEPOINT
+  ALTER LARGE OBJECT               CREATE FUNCTION                  DROP GROUP                       RESET
+  ALTER MATERIALIZED VIEW          CREATE GROUP                     DROP INDEX                       REVOKE
+  ALTER OPERATOR                   CREATE INDEX                     DROP LANGUAGE                    ROLLBACK
+  ALTER OPERATOR CLASS             CREATE LANGUAGE                  DROP MATERIALIZED VIEW           ROLLBACK PREPARED
+  ALTER OPERATOR FAMILY            CREATE MATERIALIZED VIEW         DROP OPERATOR                    ROLLBACK TO SAVEPOINT
+  ALTER ROLE                       CREATE OPERATOR                  DROP OPERATOR CLASS              SAVEPOINT
+  ALTER RULE                       CREATE OPERATOR CLASS            DROP OPERATOR FAMILY             SECURITY LABEL
+  ALTER SCHEMA                     CREATE OPERATOR FAMILY           DROP OWNED                       SELECT
+  ALTER SEQUENCE                   CREATE ROLE                      DROP ROLE                        SELECT INTO
+  ALTER SERVER                     CREATE RULE                      DROP RULE                        SET
+  ALTER SYSTEM                     CREATE SCHEMA                    DROP SCHEMA                      SET CONSTRAINTS
+  ALTER TABLE                      CREATE SEQUENCE                  DROP SEQUENCE                    SET ROLE
+  ALTER TABLESPACE                 CREATE SERVER                    DROP SERVER                      SET SESSION AUTHORIZATION
+  ALTER TEXT SEARCH CONFIGURATION  CREATE TABLE                     DROP TABLE                       SET TRANSACTION
+  ALTER TEXT SEARCH DICTIONARY     CREATE TABLE AS                  DROP TABLESPACE                  SHOW
+  ALTER TEXT SEARCH PARSER         CREATE TABLESPACE                DROP TEXT SEARCH CONFIGURATION   START TRANSACTION
+  ALTER TEXT SEARCH TEMPLATE       CREATE TEXT SEARCH CONFIGURATION DROP TEXT SEARCH DICTIONARY      TABLE
+  ALTER TRIGGER                    CREATE TEXT SEARCH DICTIONARY    DROP TEXT SEARCH PARSER          TRUNCATE
+  ALTER TYPE                       CREATE TEXT SEARCH PARSER        DROP TEXT SEARCH TEMPLATE        UNLISTEN
+  ALTER USER                       CREATE TEXT SEARCH TEMPLATE      DROP TRIGGER                     UPDATE
+  ALTER USER MAPPING               CREATE TRIGGER                   DROP TYPE                        VACUUM
+  ALTER VIEW                       CREATE TYPE                      DROP USER                        VALUES
+  ANALYZE                          CREATE USER                      DROP USER MAPPING                WITH
+  BEGIN                            CREATE USER MAPPING              DROP VIEW                        
+  CHECKPOINT                       CREATE VIEW                      END                              
+  CLOSE                            DEALLOCATE                       EXECUTE                          
