@@ -1,0 +1,6 @@
+name = Tripal Download API: Example
+description = Provides examples on how to use the Tripal Download API and demonstrates it's functionality.
+core = 7.x
+package = Tripal Extensions
+dependencies[] = tripal_core
+dependencies[] = trpdownload_api

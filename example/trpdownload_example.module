@@ -1,0 +1,148 @@
+<?php
+/**
+ * @file
+ * Provides some examples showing how module developers could use the
+ * Tripal Download API.
+ */
+
+/**
+ * Implements hook_register_trpdownload_type().
+ */
+function trpdownload_example_register_trpdownload_type() {
+  $types = array();
+
+  $types['feature_csv'] = array(
+    'type_name' => 'Feature CSV',
+    'format' => 'Comma-separated Values',
+    'functions' => array(
+      'generate_file' => 'trpdownload_feature_csv_generate_file',
+    ),
+  );
+
+  return $types;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function trpdownload_example_menu() {
+  $items = array();
+
+  $items['chado/feature/csv'] = array(
+    'title' => 'Download Features: CSV',
+    'page callback' => 'trpdownload_download_page',
+    'page arguments' => array('feature_csv', 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Generates a file listing feature in CSV.
+ *
+ * @param $variables
+ *   An associative array of parameters including:
+ *     - q: all the query paramters.
+ *     - site_safe_name: a sanitized version of your site name for use in variables & filenames.
+ *     - type_info: an array of info for the download type.
+ *     - suffix: the file format suffix.
+ *     - filename: the filename of the file to generate not including path.
+ *     - fullpath: the full path and filename of the file to generate.
+ *     - format_name: a human-readable description of the format.
+ * @param $job_id
+ *   The ID of the tripal job executing this function ;-).
+ */
+function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
+
+  // Create the file and ready it for writting to.
+  $filepath = variable_get('trpdownload_fullpath', '') . $variables['filename'];
+  drush_print("File: " . $filepath);
+  $FILE = fopen($filepath, 'w') or die ('Uable to create file to write to');
+
+
+  // Add header to the file.
+  fputcsv($FILE, array(
+    'Accession',
+    'Name',
+    'Type',
+    'Common Name',
+    'Sequence Length',
+    'Is Obsolete'
+  ));
+
+  // Determine which where criteria to include based on what is in query parameters.
+  $where = array();
+  $where_args = array();
+  // feature.name
+  if (isset($variables['q']['name']) AND !empty($variables['q']['name'])) {
+    $where[] = "feature.name ILIKE '%:name%'";
+    $where_args[':name'] = $variables['q']['name'];
+  }
+  // feature.uniquename
+  if (isset($variables['q']['uniquename']) AND !empty($variables['q']['uniquename'])) {
+    $where[] = "feature.uniquename ILIKE '%:uniquename%'";
+    $where_args[':uniquename'] = $variables['q']['uniquename'];
+  }
+  // feature.type_id
+  if (isset($variables['q']['type_id']) AND !empty($variables['q']['type_id'])) {
+    $where[] = "feature.type_id = :type_id";
+    $where_args[':type_id'] = $variables['q']['type_id'];
+  }
+  // organism.common_name
+  if (isset($variables['q']['organism'])
+    AND !empty($variables['q']['organism'])
+    AND $variables['q']['organism']!= 'All') {
+      $where[] = "organism.common_name = :organism";
+      $where_args[':organism'] = $variables['q']['organism'];
+  }
+
+  // Query copied from the views interface with where arguments determined above.
+  $query = "
+    SELECT
+      feature.uniquename AS feature_uniquename,
+      feature.name AS feature_name,
+      cvterm.name AS cvterm_name,
+      organism.common_name AS organism_common_name,
+      feature.seqlen AS feature_seqlen,
+      feature.is_obsolete AS feature_is_obsolete
+    FROM
+      {feature} feature
+      LEFT JOIN [chado_feature] chado_feature ON feature.feature_id = chado_feature.feature_id
+      LEFT JOIN [node] node_chado_feature ON chado_feature.nid = node_chado_feature.nid
+      LEFT JOIN {organism} organism ON feature.organism_id = organism.organism_id
+      LEFT JOIN {cvterm} cvterm ON feature.type_id = cvterm.cvterm_id
+      WHERE " . implode(' AND ', $where) ."
+      ORDER BY organism.common_name ASC, cvterm.name ASC, feature.name ASC";
+
+  // Determine the total number of lines resulting from the query
+  // for tracking progress.
+  $count_query = preg_replace('/SELECT.*FROM/s', 'SELECT count(*) as num_lines FROM', $query);
+  $count_query = preg_replace('/ORDER BY .*$/', '', $count_query);
+  $total_lines = chado_query($count_query, $where_args)->fetchField();
+  drush_print('Total Lines: '.$total_lines);
+
+  // Execute the original query to get the results.
+  $resource = chado_query($query, $where_args);
+
+  // For each db result write a CSV line to the file.
+  $cur_line = 0;
+  foreach ($resource as $row) {
+
+    // Output the progress.
+    $cur_line++;
+    $percent = $cur_line/$total_lines * 100;
+    if ($percent%5 == 0) {
+      drush_print(round($percent,2).'% Complete.');
+      db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:id',
+        array(':percent' => $percent, ':id' => $job_id));
+    }
+
+    // Don't forget to write the line to the file ;-).
+    fputcsv($FILE, (array)$row );
+  }
+
+  // Finally, close the file.
+  fclose($FILE);
+}
