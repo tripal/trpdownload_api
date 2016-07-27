@@ -4,31 +4,6 @@
  */
 
 /**
- * Implements hook_menu().
- */
-function trpdownload_api_menu() {
-  $items = array();
-
-  $items['tripal/download/genotype_matrix/csv'] = array(
-    'title' => 'Download Genotypes: CSV',
-    'page callback' => 'trpdownload_download_page',
-    'page arguments' => array('genotype_matrix','csv', 4),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['tripal/progress/job/%/%'] = array(
-    'title' => t('Tripal Job progress'),
-    'page callback' => 'tripal_job_progress_json',
-    'page arguments' => array(3,4),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-
-  return $items;
-}
-
-/**
  * Register a download type that can be used with this API.
  * @return
  *   An associative array of tripal download types to register. The keys on the outer
@@ -76,6 +51,185 @@ function trpdownload_get_download_type_info($machine_name) {
   return FALSE;
 }
 
+/******************************************************************************
+ * @section
+ * Generic Download Page
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function trpdownload_api_theme($existing, $type, $theme, $path) {
+  $items = array();
+
+  $items['trpdownload_page'] = array(
+    'template' => 'theme/generic_download_page',
+    'variables' => array('trpdownload_key' => NULL, 'arg1' => NULL, 'arg2' => NULL),
+  );
+
+  return $items;
+}
+
+/**
+ * Simply renders the download page template.
+ */
+function trpdownload_download_page($trpdownload_key, $arg1 = NULL, $arg2 = NULL) {
+  $path = drupal_get_path('module','trpdownload_api');
+
+  $variables = array(
+    'trpdownload_key' => $trpdownload_key,
+    'arg1' => $arg1,
+    'arg2' => $arg2,
+  );
+  trpdownload_api_prepare_download_page_vars($variables);
+
+  if (isset($variables['job_id'])) {
+    // Add the JS needed for AJAX updating based on job progress.
+    drupal_add_js('misc/progress.js');
+    drupal_add_js($path . '/theme/js/trpdownloadApiProgressBar.js');
+    drupal_add_js($path . '/theme/js/trpdownloadApiFileBoxFeedback.js');
+
+    // Add settings needed by the above JS scripts.
+    drupal_add_js(
+     array(
+       'trpdownloadApiProgressBar' => array(
+         'progressPath' => url('/tripal/progress/job/'.$trpdownload_key.'/'.$variables['job_id'])
+       )
+     ),
+     'setting'
+   );
+  }
+
+  drupal_add_css($path . '/theme/css/generic_download_page.css');
+
+  return theme('trpdownload_page', $variables);
+}
+
+/**
+ * Prepare the variables needed for the generic download page.
+ * Note: If there is no job_id arguements then this function will create a new tripal job.
+ *
+ * @param $variables
+ *   An array of variables to be made available to the theme function.
+ */
+function trpdownload_api_prepare_download_page_vars(&$variables) {
+
+  // Save the query parameters.
+  $variables['q'] = drupal_get_query_parameters();
+  $variables['format'] = $variables['arg1']; //@TODO not generic.
+  $variables['job_code'] = (isset($variables['arg2'])) ? $variables['arg2'] : NULL;
+
+  // If we have the job_id encoded in the URL then we should show the user progress
+  // on the generation of their download file. All of the variables needed to show them
+  // this progress should have been saved in the job so pull them out now :-).
+  if ($variables['job_code']) {
+    $variables['job_id'] = $variables['job_code'];
+    $variables['job'] = tripal_get_job($variables['job_id']);
+    $variables['job']->arguments = unserialize($variables['job']->arguments);
+    $variables['download_args'] = $variables['job']->arguments['variables'];
+    $info = $variables['download_args']['type_info'];
+  }
+  // Otherwise we should parse the URL and create a tripal job to generate the file
+  // and then save that job_id in the URL.
+  else {
+    $variables['download_args']['q'] = $variables['q'];
+    $variables['download_args']['safe_site_name'] = preg_replace('/\W+/','',ucwords(strip_tags(variable_get('site_name', 'Drupal'))));
+
+    // First get information for the specified download type.
+    $info = trpdownload_get_download_type_info($variables['trpdownload_key']);
+    $variables['download_args']['type_info'] = $info;
+
+    // Determine the suffix the file should be given.
+    $variables['download_args']['suffix'] = (isset($info['file_suffix'])) ? $info['file_suffix'] : 'txt';
+    if (isset($info['functions']['get_file_suffix']) AND function_exists($info['functions']['get_file_suffix'])) {
+      $variables['download_args']['suffix'] = call_user_func($info['functions']['get_file_suffix'], $variables);
+    }
+
+    // Deteremine the file name to give the generated file.
+    $variables['download_args']['filename'] = NULL;
+    if (isset($info['functions']['get_filename']) AND function_exists($info['functions']['get_filename'])) {
+      $variables['download_args']['filename'] = call_user_func($info['functions']['get_filename'], $variables);
+    }
+    if (!$variables['download_args']['filename']) {
+      $variables['download_args']['filename'] = $variables['download_args']['safe_site_name'] .'.'. $variables['trpdownload_key'] .'.'. date('YMj-his');
+    }
+    $variables['download_args']['filename'] .= '.' . $variables['download_args']['suffix'];
+
+    // Determine the human-readable name of the file format.
+    $variables['download_args']['format_name'] = 'Text';
+    if (isset($info['format'])) {
+      $variables['download_args']['format_name'] = $info['format'];
+    }
+    elseif (isset($info['type_name'])) {
+      $variables['download_args']['format_name'] = $info['type_name'];
+    }
+    if (isset($info['functions']['get_format']) AND function_exists($info['functions']['get_format'])) {
+      $variables['download_args']['format_name'] = call_user_func($info['functions']['get_format'], $variables);
+    }
+
+    // Now create the tripal job to generate the file :-D.
+    if (isset($info['functions']['generate_file']) AND function_exists($info['functions']['generate_file'])) {
+      global $user;
+      $variables['job_id'] = tripal_add_job(
+        'Download '.$info['type_name'],
+        'trpdownload_api',
+        $info['functions']['generate_file'],
+        array('variables' => $variables['download_args']),
+        $user->uid
+      );
+
+      // Encode the URL.
+      $variables['job_code'] = $variables['job_id'];
+
+      // Determine the path to redirect to.
+      global $base_url;
+      $variables['path'] = $base_url . '/' . current_path() . '/' . $variables['job_code'];
+
+      // Load the job so my progress bar knows what to display ;-).
+      $variables['job'] = tripal_get_job($variables['job_id']);
+
+    }
+    else {
+      tripal_report_error(
+        'trpdownload_api',
+        TRIPAL_CRITICAL,
+        'Function to generate file for %type is not set or doesn\'t exist.',
+        array('%type' => $variables['trpdownload_key'])
+      );
+    }
+  }
+
+  if (isset($variables['job_id'])) {
+    // Used by javascript to determine the status of the job and update this page via ajax.
+    $variables['progress_path'] = url('/tripal/progress/job/'.$variables['trpdownload_key'].'/'.$variables['job_id']);
+  }
+
+  // Determine the URL of the file once it's been generated.
+  $variables['file_download_url'] = file_create_url(variable_get('trpdownload_relpath', NULL) . $variables['download_args']['filename']);
+}
+
+/******************************************************************************
+ * @section
+ * JSON Callback to track Tripal Job
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function trpdownload_api_menu() {
+  $items = array();
+
+  $items['tripal/progress/job/%/%'] = array(
+    'title' => t('Tripal Job progress'),
+    'page callback' => 'tripal_job_progress_json',
+    'page arguments' => array(3,4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
 /**
  * Return the progress of the specified job
  * formatted for updating the drupal progress bar.
@@ -105,28 +259,6 @@ function tripal_job_progress_json($type, $job_id) {
 
   print drupal_json_output($progress);
   exit();
-}
-
-/**
- * Implements hook_theme().
- */
-function trpdownload_api_theme($existing, $type, $theme, $path) {
-  $items = array();
-
-  $items['trpdownload_page'] = array(
-    'template' => 'theme/generic_download_page',
-    'variables' => array('trpdownload_key' => NULL, 'arg1' => NULL, 'arg2' => NULL),
-  );
-
-  return $items;
-}
-
-/**
- * Simply render the download page template.
- */
-function trpdownload_download_page($trpdownload_key, $arg1 = NULL, $arg2 = NULL) {
-  $_GET['job_id'] = 5;
-  return theme('trpdownload_page', array('trpdownload_key' => $trpdownload_key, 'arg1' => $arg1, 'arg2' => $arg2));
 }
 
 /**
@@ -173,21 +305,4 @@ function trpdownload_api_get_status_msg($progress, $job) {
   }
 
   return $progress;
-}
-
-/**
- *
- */
-function never_ending_job($variables, $job_id = NULL) {
-
-  $p = 0;
-  while(TRUE) {
-    print "Sleeping 10\n";
-    sleep(10);
-
-    $p = ($p < 100) ? $p + 10 : 0;
-    print "Progress: $p\n";
-    db_query('UPDATE {tripal_jobs} SET progress=:p WHERE job_id=:id',
-      array(':id' => $job_id, ':p' => $p));
-  }
 }

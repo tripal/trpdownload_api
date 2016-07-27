@@ -1,0 +1,61 @@
+/* Layout */
+.download-page {
+  margin-top: 60px;
+}
+.progress-pane {
+  clear: both;
+  margin: 20px 12px 20px 13px;
+}
+.download-pane {
+  display: flex;
+  margin: 0px 15px;
+  padding: 20px 10px;
+  height: 128px;
+}
+.inner-pane {
+  margin: 23px;
+  margin-bottom: 0;
+  flex-grow: 1;
+  width: 125px;
+}
+.download-pane h2 {
+  margin-top: 0;
+}
+.download-pane ul {
+  margin: 0;
+}
+
+/* Style */
+.download-pane {
+  border: 1px solid #D0D0D0;
+  font-size: 12px;
+}
+.download-pane .file-format {
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.messages.info {
+  background-color: #ECF6FE;
+  border: 1px solid #65A6E9;
+  background-image: url('../icons/info.24.png');
+}
+
+/* Color Que's for status */
+.download-pane.file-ready {
+  color: black;
+  border-color: #be7;
+  background-color: #f8fff0;
+}
+.download-pane.file-error, .download-pane.file-error a {
+  color: black;
+  border-color: #8c2e0b;
+  background-color: #fef5f1;
+}
+.download-pane.file-not-ready, .download-pane.file-not-ready a {
+  color: #999999;
+}
+.download-pane.file-not-ready img {
+  -webkit-filter: opacity(40%);
+  filter: opacity(40%);
+}
