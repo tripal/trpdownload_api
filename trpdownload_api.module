@@ -3,6 +3,8 @@
  * @file
  */
 
+require_once "includes/trpdownload_api.tripal_jobs.inc";
+
 /**
  * Register a download type that can be used with this API.
  * @return
@@ -51,6 +53,22 @@ function trpdownload_get_download_type_info($machine_name) {
   return FALSE;
 }
 
+/**
+ * Implements hook_menu().
+ */
+function trpdownload_api_menu() {
+  $items = array();
+
+  $items['tripal/progress/job/%/%'] = array(
+    'title' => t('Tripal Job progress'),
+    'page callback' => 'tripal_job_progress_json',
+    'page arguments' => array(3,4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
 /******************************************************************************
  * @section
  * Generic Download Page
@@ -116,14 +134,13 @@ function trpdownload_api_prepare_download_page_vars(&$variables) {
 
   // Save the query parameters.
   $variables['q'] = drupal_get_query_parameters();
-  $variables['format'] = $variables['arg1']; //@TODO not generic.
-  $variables['job_code'] = (isset($variables['arg2'])) ? $variables['arg2'] : NULL;
+  $variables['job_code'] = (isset($variables['arg1'])) ? $variables['arg1'] : NULL;
 
   // If we have the job_id encoded in the URL then we should show the user progress
   // on the generation of their download file. All of the variables needed to show them
   // this progress should have been saved in the job so pull them out now :-).
   if ($variables['job_code']) {
-    $variables['job_id'] = $variables['job_code'];
+    $variables['job_id'] = trpdownload_api_reveal_secret($variables['job_code']);
     $variables['job'] = tripal_get_job($variables['job_id']);
     $variables['job']->arguments = unserialize($variables['job']->arguments);
     $variables['download_args'] = $variables['job']->arguments['variables'];
@@ -179,7 +196,7 @@ function trpdownload_api_prepare_download_page_vars(&$variables) {
       );
 
       // Encode the URL.
-      $variables['job_code'] = $variables['job_id'];
+      $variables['job_code'] = trpdownload_api_make_secret($variables['job_id']);
 
       // Determine the path to redirect to.
       global $base_url;
@@ -206,103 +223,4 @@ function trpdownload_api_prepare_download_page_vars(&$variables) {
 
   // Determine the URL of the file once it's been generated.
   $variables['file_download_url'] = file_create_url(variable_get('trpdownload_relpath', NULL) . $variables['download_args']['filename']);
-}
-
-/******************************************************************************
- * @section
- * JSON Callback to track Tripal Job
- */
-
-/**
- * Implements hook_menu().
- */
-function trpdownload_api_menu() {
-  $items = array();
-
-  $items['tripal/progress/job/%/%'] = array(
-    'title' => t('Tripal Job progress'),
-    'page callback' => 'tripal_job_progress_json',
-    'page arguments' => array(3,4),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-
-  return $items;
-}
-
-/**
- * Return the progress of the specified job
- * formatted for updating the drupal progress bar.
- *
- * @param $type
- *   The machine name of the tripal download type.
- * @param $job_id
- *   The tripal job_id of the job you would like to check progrtess for.
- * @return
- *   JSON describing the progress of the specified Tripal job.
- */
-function tripal_job_progress_json($type, $job_id) {
-  $r = db_query('SELECT * FROM {tripal_jobs} WHERE job_id=:id',
-    array(':id' => $job_id))->fetchObject();
-
-  $progress = array(
-    'percentage' => $r->progress,
-    'message' => $r->status,
-    'file_message' => $r->status,
-    'file_class' => 'file-'.str_replace(' ','-',strtolower($r->status)),
-  );
-
-  // Make the Tripal job messages more specific to the generating of a file.
-  $info = trpdownload_get_download_type_info($type);
-  $function = (isset($info['function']['progress_msg'])) ? $info['function']['progress_msg'] : 'trpdownload_api_get_status_msg';
-  $progress = call_user_func($function, $progress, $r);
-
-  print drupal_json_output($progress);
-  exit();
-}
-
-/**
- * Determine the status to show to the user.
- *
- * @param $job
- *   An object describing the current state of the job.
- * @return
- *   An array describing the status of the job with at least the following two keys:
- *    - percentage: a whole number percentage (ie: 50 for 50%).
- *    - message: a string message to the user.
- *   Other important keys include:
- *    - file_message: the message displayed on the api-provided download page in the file box.
- *    - file_class: a class to add to the file box in the api-provided download page.
- */
-function trpdownload_api_get_status_msg($progress, $job) {
-
-  switch ($job->status) {
-    case 'Waiting':
-      $progress['message'] = 'In Job Queue...';
-      $progress['file_message'] = 'Waiting to generate file.';
-      $progress['file_class'] = 'file-not-ready';
-      break;
-    case 'Error':
-      $progress['message'] = 'Encountered an Error.';
-      $progress['file_message'] = 'Unable to generate file.';
-      $progress['file_class'] = 'file-error';
-      break;
-    case 'Cancelled':
-      $progress['message'] = 'Cancelled by an Administrator.';
-      $progress['file_message'] = 'Unable to generate file.';
-      $progress['file_class'] = 'file-error';
-      break;
-    case 'Completed':
-      $progress['message'] = 'Completed Successfully.';
-      $progress['file_message'] = 'File Generated.';
-      $progress['file_class'] = 'file-ready';
-      break;
-    case 'Running':
-      $progress['message'] = 'Generating file...';
-      $progress['file_message'] = 'Generating file.';
-      $progress['file_class'] = 'file-not-ready';
-      break;
-  }
-
-  return $progress;
 }
