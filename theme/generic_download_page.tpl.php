@@ -31,7 +31,7 @@ $info = $variables['download_args']['type_info'];
 
 <?php if (isset($variables['job_id'])) { ?>
 
-  <div class="messages info">We are working on generating the file you requested. Refer to the progress bar below for status.</div>
+  <div class="context-text">We are working on generating the file you requested. Refer to the progress bar below for status.</div>
   <div class="progress-pane"></div>
   <div class="download-pane">
     <?php print theme_image(array(

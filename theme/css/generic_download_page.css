@@ -4,7 +4,7 @@
 }
 .progress-pane {
   clear: both;
-  margin: 20px 12px 20px 13px;
+  margin: 10px 12px 20px 13px;
 }
 .download-pane {
   display: flex;
@@ -34,7 +34,10 @@
   font-style: italic;
   font-size: 0.9em;
 }
-
+.context-text {
+  margin: 2px 15px;
+  font-style: italic;
+}
 .messages.info {
   background-color: #ECF6FE;
   border: 1px solid #65A6E9;
