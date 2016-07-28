@@ -77,12 +77,12 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
   $where_args = array();
   // feature.name
   if (isset($variables['q']['name']) AND !empty($variables['q']['name'])) {
-    $where[] = "feature.name ILIKE '%:name%'";
+    $where[] = "feature.name ~ :name";
     $where_args[':name'] = $variables['q']['name'];
   }
   // feature.uniquename
   if (isset($variables['q']['uniquename']) AND !empty($variables['q']['uniquename'])) {
-    $where[] = "feature.uniquename ILIKE '%:uniquename%'";
+    $where[] = "feature.uniquename ~ :uniquename";
     $where_args[':uniquename'] = $variables['q']['uniquename'];
   }
   // feature.type_id
@@ -136,7 +136,7 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
     if ($percent%5 == 0) {
       drush_print(round($percent,2).'% Complete.');
       db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:id',
-        array(':percent' => $percent, ':id' => $job_id));
+        array(':percent' => round($percent), ':id' => $job_id));
     }
 
     // Don't forget to write the line to the file ;-).
