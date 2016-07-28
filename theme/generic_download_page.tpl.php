@@ -23,7 +23,7 @@ $info = $variables['download_args']['type_info'];
       This is done via javascript/HTML5 in order to avoid the page refresh. -->
 <?php if (isset($variables['path'])) : ?>
   <script>
-    window.history.pushState('', 'Download: Job Submitted', "<?php print $variables['path'];?>");
+    window.history.replaceState('', 'Download: Job Submitted', "<?php print $variables['path'];?>");
   </script>
 <?php endif; ?>
 

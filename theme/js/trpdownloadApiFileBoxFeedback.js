@@ -40,11 +40,15 @@
             pane.removeClass('file-error');
             pane.addClass(progress.file_class);
 
-            // Stock checking.
+            // If our progress is complete then stop checking.
             if (progress.percentage == 100) {
               return;
             }
+            // Only if our progress is not complete, disable link
+            // and, of course, schedule when to check again.
             else {
+              $('.file-link a').attr("disabled", true);
+
               setTimeout(trpdownloadapiUpdateStatus, 1000);
             }
           },

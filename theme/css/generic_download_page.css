@@ -59,3 +59,8 @@
   -webkit-filter: opacity(40%);
   filter: opacity(40%);
 }
+
+/* Disable the link */
+a[disabled] {
+    pointer-events: none;
+}
