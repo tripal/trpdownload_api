@@ -41,7 +41,12 @@ $info = $variables['download_args']['type_info'];
     ));?>
     <div class="inner-pane file">
       <h2>File:</h2>
-      <div class="file-link"><?php print l($variables['download_args']['filename'], $variables['file_download_url'], array('download' => $variables['download_args']['filename']) );?></div>
+      <div class="file-link">
+        <?php print l(
+          $variables['download_args']['filename'],
+          $variables['file_download_url'],
+          array('attributes' => array('download' => $variables['download_args']['filename'], 'target' => '_blank'))
+        );?></div>
       <div class="file-format">Format: <?php print $variables['download_args']['format_name']?></div>
     </div>
     <div class="inner-pane summary">
