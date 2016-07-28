@@ -28,7 +28,7 @@
       $('.progress-pane').append(pb.element);
 
       // Start monitoring the JSN callback for status.
-      pb.startMonitoring(Drupal.settings.trpdownloadApiProgressBar.progressPath,2000);
+      pb.startMonitoring(Drupal.settings.trpdownloadApiProgressBar.progressPath,1000);
 
     }
   };
