@@ -73,7 +73,37 @@ function trpdownload_example_menu() {
  *   The ID of the tripal job executing this function ;-).
  */
 function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
-   *All your code for generating the file */
+
+  // Create the file and ready it for writting to.
+  $filepath = variable_get('trpdownload_fullpath', '') . $variables['filename'];
+  drush_print("File: " . $filepath);
+  $FILE = fopen($filepath, 'w') or die ('Uable to create file to write to');
+
+  // Determine the total number of lines resulting from the query
+  // for tracking progress.
+  $total_lines = chado_query($count_query, $where_args)->fetchField();
+  drush_print('Total Lines: '.$total_lines);
+  
+  /* Your code to determine SQL Query based on URL query paramters */
+
+  // Execute the original query to get the results.
+  $resource = chado_query($query, $where_args);
+  
+  // For each result...
+  foreach ($resource as $row) {
+
+    // Output the progress.
+    // Updating Tripal jobs is how you show your user the progress.
+    $cur_line++;
+    $percent = $cur_line/$total_lines * 100;
+    if ($percent%5 == 0) {
+      drush_print(round($percent,2).'% Complete.');
+      db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:id',
+        array(':percent' => round($percent), ':id' => $job_id));
+    }
+    
+    /* Don't forget to write to the file */
+  }
 }
 ````
 4.The URL of the page changes to hide the query parameters and instead show an obsfuscated job_id allowing users to bookmark this page if needed. There is an ajax progress bar that shows the progress of the Tripal job and once complete, provides a link to the user to download the file.
