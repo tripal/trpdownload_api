@@ -4,6 +4,7 @@
  */
 
 require_once "includes/trpdownload_api.tripal_jobs.inc";
+require_once "api/trpdownload.api.inc";
 
 /**
  * Register a download type that can be used with this API.

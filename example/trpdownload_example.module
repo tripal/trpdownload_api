@@ -116,12 +116,16 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
       WHERE " . implode(' AND ', $where) ."
       ORDER BY organism.common_name ASC, cvterm.name ASC, feature.name ASC";
 
-  // Determine the total number of lines resulting from the query
-  // for tracking progress.
+  // Determine the total number of lines resulting from the query for tracking progress.
+  // Since this number can be an estimate, use trpdownload_estimate_rows() which is much
+  // faster then count(*). However, we need to keep in mind it can be off by a lot
+  // and ensure that the user is never told generate the file is complete before it is.
   $count_query = preg_replace('/SELECT.*FROM/s', 'SELECT count(*) as num_lines FROM', $query);
   $count_query = preg_replace('/ORDER BY .*$/', '', $count_query);
-  $total_lines = chado_query($count_query, $where_args)->fetchField();
-  drush_print('Total Lines: '.$total_lines);
+  $total_lines = trpdownload_estimate_rows($count_query, $where_args);
+  // If you want to do an EXACT count use the following instead:
+  // $total_lines = chado_query($count_query, $where_args)->fetchField();
+  drush_print('Estimated Total Lines: '.$total_lines);
 
   // Execute the original query to get the results.
   $resource = chado_query($query, $where_args);
@@ -133,7 +137,9 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
     // Output the progress.
     $cur_line++;
     $percent = $cur_line/$total_lines * 100;
-    if ($percent%5 == 0) {
+    // Here we make sure not to tell the use that we are done before we are ($percent != 100)
+    // This is needed because we estimated the total number of lines above.
+    if ( ($percent%5 == 0) AND ($percent != 100) ) {
       drush_print(round($percent,2).'% Complete.');
       db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:id',
         array(':percent' => round($percent), ':id' => $job_id));
@@ -145,4 +151,9 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
 
   // Finally, close the file.
   fclose($FILE);
+
+  // This is needed to ensure the user is always told we are done even if the estimated
+  // number of lines is greater then what we had.
+  db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:job_id',
+    array(':percent' => 100, ':job_id' => $job_id));
 }
