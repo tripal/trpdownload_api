@@ -42,6 +42,7 @@
 
             // If our progress is complete then stop checking.
             if (progress.percentage == 100) {
+              $('.file-link a').removeAttr("disabled");
               return;
             }
             // Only if our progress is not complete, disable link

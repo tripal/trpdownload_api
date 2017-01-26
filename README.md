@@ -47,7 +47,7 @@ function trpdownload_example_menu() {
   $items['chado/feature/csv'] = array(
     'title' => 'Download Features: CSV',
     'page callback' => 'trpdownload_download_page',
-    'page arguments' => array('feature_csv', 3),
+    'page arguments' => array('feature_csv'),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
