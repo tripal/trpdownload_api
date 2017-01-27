@@ -11,11 +11,22 @@
 function trpdownload_example_register_trpdownload_type() {
   $types = array();
 
+  // The key is the machine name of my download type.
   $types['feature_csv'] = array(
+    // A human readable name to show in an administrative interface one day.
     'type_name' => 'Feature CSV',
+    // A human readable description of the format.
     'format' => 'Comma-separated Values',
+    // An array of functions that the API will use to customize your experience.
     'functions' => array(
+      // The function that tripal jobs will call to generate the file.
       'generate_file' => 'trpdownload_feature_csv_generate_file',
+      // OPTIONAL: provide a summary to the user on the download page.
+      'summarize' => 'trpdownload_feature_csv_summarize_download',
+      // OPTIONAL: determine your own filename.
+      'get_filename' => 'trpdownload_feature_csv_get_filename',
+      // OPTIONAL: Change the file suffix (defaults to .txt)
+      'get_file_suffix' => 'trpdownload_feature_csv_get_suffix',
     ),
   );
 
@@ -156,4 +167,91 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
   // number of lines is greater then what we had.
   db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:job_id',
     array(':percent' => 100, ':job_id' => $job_id));
+}
+
+/**
+ * Customize the filename for the feature_csv download type.
+ *
+ * @param $vars
+ *   An array of variables available to this function. Including:
+ *     - ['download_args']['q']: all the arguments in the path passed to the Tripal Download API
+ *     - ['download_args']['safe_site_name']: a sanitized version of the site-name for use in filenames
+ *     - ['download_args']['type_info']: what you defined in hook_register_trpdownload_type() for the current download type
+ * @return
+ *   A string representing the filename for a specific download.
+ */
+function trpdownload_feature_csv_get_filename($vars) {
+
+  $filename = $vars['download_args']['safe_site_name'] .'.sequence_features.' . date('YMj-his');
+  return $filename;
+
+}
+
+/**
+ * Customize the file suffix for the feature_csv download type.
+ *
+ * @param $vars
+ *   An array of variables available to this function.  Including:
+ *     - ['download_args']['q']: all the arguments in the path passed to the Tripal Download API
+ *     - ['download_args']['safe_site_name']: a sanitized version of the site-name for use in filenames
+ *     - ['download_args']['type_info']: what you defined in hook_register_trpdownload_type() for the current download type
+ * @return
+ *   A string representing the file suffix for a specific download.
+ */
+function trpdownload_feature_csv_get_suffix($vars) {
+  return 'csv';
+}
+
+
+/**
+ * Summarize the current download for Feature CSV download type.
+ *
+ * @param $vars
+ *   An array of variables available to this function. Including:
+ *     - ['download_args']['q']: all the arguments in the path passed to the Tripal Download API
+ *     - ['download_args']['safe_site_name']: a sanitized version of the site-name for use in filenames
+ *     - ['download_args']['type_info']: what you defined in hook_register_trpdownload_type() for the current download type
+ * @return
+ *   A string representing the summary (can include html).
+ */
+function trpdownload_feature_csv_summarize_download($vars) {
+  $output = ''; // The variable storing the HTML output.
+
+  // First, put the query arguments in a more accessible variable.
+  $q = $vars['download_args']['q'];
+
+  $output .= '<span>Sequence features where</span>';
+  $output .= '<ul>';
+
+  // Unique Name:
+  // Since the operator is exposed we have two variables: uniquename_op has the operator and uniquename has the value.
+  // Check the URL of your view after filtering to determine what these variables will be.
+  if (!empty($q['uniquename'])) {
+    $output .= '<li>Unique Name ' . $q['uniquename_op'] . ' <em>"' . $q['uniquename'] . '"</em></li>';
+  }
+
+  // Name: Handle the same as uniquename.
+  if (!empty($q['name'])) {
+    $output .= '<li>Unique Name ' . $q['name_op'] . ' <em>"' . $q['name'] . '"</em></li>';
+  }
+
+  // Feature Type:
+  // The type_id is saved in the URL.
+  if (!empty($q['type_id']) AND is_int($q['type_id'])) {
+     // Since the type_id is not very friendly to the users, look up the name of the type first.
+     $name = chado_query('SELECT name FROM {cvterm} WHERE type_id=:id',
+       array(':id' => $q['type_id']))->fetchField();
+     if ($name) {
+       $output .= '<li>Only "'.$name.'"</li>';
+     }
+  }
+
+  // Organism Common Name:
+  // Luckily the full common name is stored in the path.
+  if (!empty($q['organism'])) {
+    $output .= '<li>From <i>"'.$q['organism'].'"</i></li>';
+  }
+
+  $output .= '</ul>';
+  return $output;
 }
