@@ -110,6 +110,9 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
 
 Thus module developers can provide a simple interface showing progress and providing access to the file by (1) specify a download type and path, (2) Implementing a generate_file function, and (3) Linking to the download page and passing information in the form of query parameters.
 
+## Documentation
+Full documentation is available on GitHub at https://github.com/tripal/trpdownload_api/wiki/Overview.
+
 ## Future Work
 Development on this module has just begun and as such it still doesn't meet all the needs of the Tripal community. The following list of features are needs that we know exist and intend to address. If you have any additional needs in reference to downloads please open an issue and tell us about it!
 * Views Support
