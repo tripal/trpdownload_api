@@ -11,17 +11,4 @@ function trpdownload_api_enable() {
   // Create a directory for generated downloads to live in.
   tripal_create_files_dir('tripal_downloads');
 
-  // Create some variables to store the directory paths.
-  variable_set('trpdownload_fullpath', drupal_realpath('public://') . '/tripal/tripal_downloads/');
-  variable_set('trpdownload_relpath', 'public://tripal/tripal_downloads/');
-}
-
-/**
- * Implements hook_enable().
- */
-function trpdownload_api_uninstall() {
-
-  // Clean up our variables.
-  variable_del('trpdownload_fullpath');
-  variable_del('trpdownload_relpath');
 }

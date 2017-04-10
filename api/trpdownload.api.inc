@@ -61,3 +61,26 @@ function trpdownload_estimate_rows($query, $args = array()) {
     }
   }
 }
+
+/**
+ * Retrieve the path to save downloadable files at.
+ *
+ * @param $type
+ *   Whether you want the full path or relative path ('full' and 'relative' respectively.)
+ * @return
+ *   The directory path to save downloadable files in.
+ */
+function trpdownload_api_get_filedir($type = 'full') {
+
+  // Add for backwards compatibility :-(.
+  variable_set('trpdownload_fullpath', drupal_realpath('public://') . '/tripal/tripal_downloads/');
+  variable_set('trpdownload_relpath', 'public://tripal/tripal_downloads/');
+
+  if ($type == 'relative') {
+    return 'public://tripal/tripal_downloads/';
+  }
+  // Assume they want the full path.
+  else {
+    return drupal_realpath('public://') . '/tripal/tripal_downloads/';
+  }
+}

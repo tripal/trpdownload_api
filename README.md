@@ -67,7 +67,7 @@ function trpdownload_example_menu() {
  *     - type_info: an array of info for the download type.
  *     - suffix: the file format suffix.
  *     - filename: the filename of the file to generate not including path.
- *     - fullpath: the full path and filename of the file to generate.
+ *     - fullpath: the full path where the file should be generated.
  *     - format_name: a human-readable description of the format.
  * @param $job_id
  *   The ID of the tripal job executing this function ;-).
@@ -75,7 +75,7 @@ function trpdownload_example_menu() {
 function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
 
   // Create the file and ready it for writting to.
-  $filepath = variable_get('trpdownload_fullpath', '') . $variables['filename'];
+  $filepath = $variables['fullpath'] . $variables['filename'];
   drush_print("File: " . $filepath);
   $FILE = fopen($filepath, 'w') or die ('Uable to create file to write to');
 
@@ -83,12 +83,12 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
   // for tracking progress.
   $total_lines = chado_query($count_query, $where_args)->fetchField();
   drush_print('Total Lines: '.$total_lines);
-  
+
   /* Your code to determine SQL Query based on URL query paramters */
 
   // Execute the original query to get the results.
   $resource = chado_query($query, $where_args);
-  
+
   // For each result...
   foreach ($resource as $row) {
 
@@ -101,7 +101,7 @@ function trpdownload_feature_csv_generate_file($variables, $job_id = NULL) {
       db_query('UPDATE {tripal_jobs} SET progress=:percent WHERE job_id=:id',
         array(':percent' => round($percent), ':id' => $job_id));
     }
-    
+
     /* Don't forget to write to the file */
   }
 }

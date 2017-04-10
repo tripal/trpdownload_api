@@ -163,7 +163,7 @@ function trpdownload_api_prepare_download_page_vars(&$variables) {
       $variables['download_args']['suffix'] = call_user_func($info['functions']['get_file_suffix'], $variables);
     }
 
-    // Deteremine the file name to give the generated file.
+    // Determine the file name to give the generated file.
     $variables['download_args']['filename'] = NULL;
     if (isset($info['functions']['get_filename']) AND function_exists($info['functions']['get_filename'])) {
       $variables['download_args']['filename'] = call_user_func($info['functions']['get_filename'], $variables);
@@ -172,6 +172,10 @@ function trpdownload_api_prepare_download_page_vars(&$variables) {
       $variables['download_args']['filename'] = $variables['download_args']['safe_site_name'] .'.'. $variables['trpdownload_key'] .'.'. date('YMj-his');
     }
     $variables['download_args']['filename'] .= '.' . $variables['download_args']['suffix'];
+
+    // Save the file paths.
+    $variables['download_args']['fullpath'] = trpdownload_api_get_filedir('full');
+    $variables['download_args']['relpath'] = trpdownload_api_get_filedir('relative');
 
     // Determine the human-readable name of the file format.
     $variables['download_args']['format_name'] = 'Text';
@@ -223,5 +227,5 @@ function trpdownload_api_prepare_download_page_vars(&$variables) {
   }
 
   // Determine the URL of the file once it's been generated.
-  $variables['file_download_url'] = file_create_url(variable_get('trpdownload_relpath', NULL) . $variables['download_args']['filename']);
+  $variables['file_download_url'] = file_create_url( trpdownload_api_get_filedir('relative') . $variables['download_args']['filename']);
 }
