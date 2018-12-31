@@ -4,4 +4,4 @@ description = Provides an api for creating download pages. Uses tripal Jobs to g
 version = 7.x-0.x
 core = 7.x
 
-dependencies[] = tripal_core
+dependencies[] = tripal
