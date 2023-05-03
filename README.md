@@ -6,6 +6,36 @@ This module provides an API for downloading Tripal/Chado data. Since download fu
 
 While we are starting work here, this service may find it's way into Tripal core.
 
+## Automated Testing
+
+This package is dedicated to a high standard of automated testing. We use
+PHPUnit for testing and CodeClimate to ensure good test coverage and maintainability.
+There are more details on [our CodeClimate project page] describing our specific
+maintainability issues and test coverage.
+
+![MaintainabilityBadge]
+![TestCoverageBadge]
+
+The following compatibility is proven via automated testing workflows.
+
+| Drupal | 9.3.x | 9.4.x | 9.5.x | 10.0.x |
+|--------|-------|-------|-------|--------|
+| **PHP 8.0** | ![Grid1A-Badge] | ![Grid1B-Badge] | ![Grid1C-Badge] |  |
+| **PHP 8.1** | ![Grid2A-Badge] | ![Grid2B-Badge] | ![Grid2C-Badge] | ![Grid2C-Badge] |
+
+[our CodeClimate project page]: https://github.com/tripal/trpdownload_api
+[MaintainabilityBadge]: https://api.codeclimate.com/v1/badges/3c768190d8546a51075e/maintainability
+[TestCoverageBadge]: https://api.codeclimate.com/v1/badges/3c768190d8546a51075e/test_coverage
+
+[Grid1A-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid1A.yml/badge.svg
+[Grid1B-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid1B.yml/badge.svg
+[Grid1C-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid1C.yml/badge.svg
+
+[Grid2A-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid2A.yml/badge.svg
+[Grid2B-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid2B.yml/badge.svg
+[Grid2C-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid2C.yml/badge.svg
+[Grid2D-Badge]: https://github.com/tripal/trpdownload_api/actions/workflows/MAIN-phpunit-Grid2D.yml/badge.svg
+
 ## Development
 
 ```
