@@ -1,0 +1,8 @@
+name: Tripal Download API EXAMPLE
+type: module
+description: Provides an example of how to use the Tripal Download plugin. SHOULD NOT BE ENABLED ON A PRODUCTION SITE.
+package: Tripal Extensions
+core_version_requirement: ^9 || ^10
+dependencies:
+  - tripal
+  - tripal_chado
