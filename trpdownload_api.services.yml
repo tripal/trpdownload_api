@@ -1,0 +1,4 @@
+services:
+  plugin.manager.tripal_download:
+    class: Drupal\trpdownload_api\TripalDownload\TripalDownloadPluginManager
+    parent: default_plugin_manager
