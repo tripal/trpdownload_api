@@ -21,7 +21,7 @@ The following compatibility is proven via automated testing workflows.
 | Drupal | 9.3.x | 9.4.x | 9.5.x | 10.0.x |
 |--------|-------|-------|-------|--------|
 | **PHP 8.0** | ![Grid1A-Badge] | ![Grid1B-Badge] | ![Grid1C-Badge] |  |
-| **PHP 8.1** | ![Grid2A-Badge] | ![Grid2B-Badge] | ![Grid2C-Badge] | ![Grid2C-Badge] |
+| **PHP 8.1** | ![Grid2A-Badge] | ![Grid2B-Badge] | ![Grid2C-Badge] |  |
 
 [our CodeClimate project page]: https://github.com/tripal/trpdownload_api
 [MaintainabilityBadge]: https://api.codeclimate.com/v1/badges/3c768190d8546a51075e/maintainability
