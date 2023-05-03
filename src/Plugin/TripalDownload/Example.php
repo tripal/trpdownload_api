@@ -10,6 +10,8 @@ use Drupal\trpdownload_api\TripalDownloadPluginBase;
  * @TripalDownload(
  *   id = "example",
  *   label = @Translation("Example Download"),
+ *   format_label = @Translation("Tab-Separated Values (TSV)"),
+ *   file_suffix = "tsv",
  *   description = @Translation("This plugin implementation provides an example of how the Tripal Download plugin can be used.")
  * )
  */
