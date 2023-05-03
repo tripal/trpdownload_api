@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\trpgeno_genetics\Functional;
+namespace Drupal\Tests\trpdownload_api\Functional;
 
 use Drupal\Core\Url;
 use Drupal\Tests\tripal_chado\Functional\ChadoTestBrowserBase;
@@ -8,7 +8,7 @@ use Drupal\Tests\tripal_chado\Functional\ChadoTestBrowserBase;
 /**
  * Simple test to ensure that main page loads with module enabled.
  *
- * @group TripGeno Genetics
+ * @group Tripal Download API
  * @group Installation
  */
 class InstallTest extends ChadoTestBrowserBase {
