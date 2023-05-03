@@ -51,20 +51,6 @@ interface TripalDownloadInterface {
   public function get_filename(array $options = []);
 
   /**
-   * Returns the file suffix to be used for a particular download file.
-   *
-   * It is recommended to set a single file suffix in the annotation for your
-   * plugin, in which case, you should not need to override this method.
-   *
-   * This method is called by get_filename().
-   *
-   * @return string
-   *   The suffix indicated file type to append to the download file
-   *   NOT INCLUDING THE DOT `.`
-   */
-  protected function get_file_suffix();
-
-  /**
    * Returns a human-readable label for the format.
    *
    * It is recommended to set a single format label in the annotation for your
