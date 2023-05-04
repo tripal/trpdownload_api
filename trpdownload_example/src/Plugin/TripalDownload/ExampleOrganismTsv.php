@@ -2,7 +2,8 @@
 
 namespace Drupal\trpdownload_example\Plugin\TripalDownload;
 
-use Drupal\trpdownload_api\TripalDownloadPluginBase;
+use Drupal\trpdownload_api\TripalDownload\TripalDownloadPluginBase;
+use Drupal\trpdownload_api\TripalDownload\TripalDownloadInterface;
 
 /**
  * EXAMPLE Plugin implementation of the tripal_download plugin.
@@ -17,7 +18,7 @@ use Drupal\trpdownload_api\TripalDownloadPluginBase;
  *   description = @Translation("This plugin implementation provides an example of how the Tripal Download plugin can be used to download data from chado. It focuses on implementing as few methods as possible.")
  * )
  */
-class ExampleOrganismTsv extends TripalDownloadPluginBase {
+class ExampleOrganismTsv extends TripalDownloadPluginBase implements TripalDownloadInterface {
 
   /**
    * {@inheritdoc}

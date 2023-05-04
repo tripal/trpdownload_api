@@ -27,7 +27,7 @@ class TripalDownloadPluginManager extends DefaultPluginManager {
       'Plugin/TripalDownload',
       $namespaces,
       $module_handler,
-      'Drupal\trpdownload_api\TripalDownloadInterface',
+      'Drupal\trpdownload_api\TripalDownload\TripalDownloadInterface',
       'Drupal\trpdownload_api\Annotation\TripalDownload'
     );
     $this->alterInfo('tripal_download_info');

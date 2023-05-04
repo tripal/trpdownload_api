@@ -4,7 +4,7 @@ namespace Drupal\Tests\trpdownload_api\Functional;
 
 use Drupal\Core\Url;
 use Drupal\Tests\tripal_chado\Functional\ChadoTestBrowserBase;
-use Drupal\trpdownload_api\TripalDownload\TripalDownloadPluginBase;
+use Drupal\trpdownload_api\TripalDownload\TripalDownloadInterface;
 
 /**
  * Simple test to ensure that main page loads with module enabled.
@@ -40,8 +40,8 @@ class BasicAnnotationTest extends ChadoTestBrowserBase {
     // Instanciate the plugin object.
     $plugin = \Drupal::service('plugin.manager.tripal_download')->createInstance($plugin_id, []);
     $this->assertIsObject($plugin, "Unable to create an instance of $plugin_id");
-    // $this->assertInstanceOf(TripalDownloadPluginBase::class, $plugin,
-    //   "Returned object for $plugin_id is not an instance of TripalDownloadPluginBase.");
+    $this->assertInstanceOf(TripalDownloadInterface::class, $plugin,
+      "Returned object for $plugin_id is not an instance of TripalDownloadPluginBase.");
 
     // Check each annotation using the getter method by the same name.
     foreach($expected_annotation as $key => $expected) {
