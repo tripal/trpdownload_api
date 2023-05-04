@@ -16,6 +16,11 @@
       <directory suffix=".php">src</directory>
       <directory suffix=".php">trpdownload_example/src</directory>
     </include>
+    <!-- Specifically exclude annotation and interface files -->
+    <exclude>
+      <file>src/Annotation/TripalDownload.php</file>
+      <file>src/TripalDownload/TripalDownloadInterface.php</file>
+    </exclude>
   </coverage>
   <php>
     <!-- Set error reporting to E_ALL. -->
