@@ -23,10 +23,10 @@ class ExampleOrganismTsv extends TripalDownloadPluginBase implements TripalDownl
   /**
    * {@inheritdoc}
    */
-  public function generate_file(array $variables, int $job_id = NULL) {}
+  public function generateFile(array $variables, int $job_id = NULL) {}
 
   /**
    * {@inheritdoc}
    */
-  public function summarize_download() {}
+  public function summarizeDownload() {}
 }

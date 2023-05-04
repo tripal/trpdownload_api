@@ -12,9 +12,9 @@ abstract class TripalDownloadPluginBase extends PluginBase implements TripalDown
   /**
    * {@inheritdoc}
    */
-  public function get_filename(array $options = []) {
+  public function getFilename(array $options = []) {
 
-    $site_name = 'Testing Localhost';
+    $site_name = \Drupal::config('system.site')->get('name');
     $safe_site_name = preg_replace('/\W+/','',ucwords(strip_tags($site_name)));
 
     $filename = $safe_site_name . '.' . $this->id() . '.' . date('YMj-his') . '.' . $this->file_suffix();
@@ -25,8 +25,16 @@ abstract class TripalDownloadPluginBase extends PluginBase implements TripalDown
   /**
    * {@inheritdoc}
    */
-  public function get_format() {
+  public function getFormat() {
     return $this->format_label();
+  }
+
+    /**
+   * {@inheritdoc}
+   */
+  public function id() {
+    // Cast the label to a string since it is a TranslatableMarkup object.
+    return (string) $this->pluginDefinition['id'];
   }
 
   /**

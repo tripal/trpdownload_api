@@ -11,7 +11,7 @@ use Drupal\trpdownload_api\TripalDownload\TripalDownloadInterface;
  *
  * @group Tripal Download API
  */
-class BasicAnnotationTest extends ChadoTestBrowserBase {
+class BaseClassTest extends ChadoTestBrowserBase {
 
   protected $defaultTheme = 'stable';
 
@@ -26,9 +26,8 @@ class BasicAnnotationTest extends ChadoTestBrowserBase {
    * Tests that we can retrieve the annotation details for our
    * example plugin implementations.
    */
-  public function testDownloadAPIGetters() {
+  public function testBaseClass() {
 
-    // @todo switch this to be supplied by a data provider.
     $plugin_id = 'example_organism_tsv';
     $expected_annotation = [
       'label' => "Example Organism TSV Download",
@@ -43,14 +42,24 @@ class BasicAnnotationTest extends ChadoTestBrowserBase {
     $this->assertInstanceOf(TripalDownloadInterface::class, $plugin,
       "Returned object for $plugin_id is not an instance of TripalDownloadPluginBase.");
 
-    // Check each annotation using the getter method by the same name.
-    foreach($expected_annotation as $key => $expected) {
-      $retrieved = $plugin->$key();
-      $this->assertIsString($retrieved,
-        "Retrieved $key was not a string.");
-      $this->assertEquals($expected, $retrieved,
-        "Unable to retrieve the expected $key set in the plugin annotation.");
-    }
+    // Check getFormat()
+    $retrieved = $plugin->getFormat();
+    $expected = $expected_annotation['format_label'];
+    $this->assertIsString($retrieved,
+      "Retrieved format was not a string.");
+    $this->assertEquals($expected, $retrieved,
+      "Unable to retrieve the expected value for getFormat().");
 
+    // Check getFilename()
+    $retrieved = $plugin->getFilename();
+    $expected = 'Fred';
+    $this->assertIsString($retrieved,
+      "Retrieved filename was not a string.");
+    $this->assertStringContainsString($plugin_id, $retrieved,
+      "The filename is expected to have the plugin_id in it.");
+    $this->assertStringContainsString(date('YMj-his'), $retrieved,
+      "The filename is expected to have the current date in it.");
+    $this->assertTrue(str_ends_with($retrieved, $expected_annotation['file_suffix']),
+      "The filename is expected to end with the file suffix.");
   }
 }

@@ -20,7 +20,7 @@ interface TripalDownloadInterface {
    * @param int $job_id
    *   The Tripal Job ID that the file will be generated in.
    */
-  public function generate_file(array $variables, int $job_id = NULL);
+  public function generateFile(array $variables, int $job_id = NULL);
 
   /**
    * Returns a summary of the download file being generated.
@@ -33,7 +33,7 @@ interface TripalDownloadInterface {
    *   Returns a Drupal render array which summarizes the variables
    *   for this download instance.
    */
-  public function summarize_download();
+  public function summarizeDownload();
 
   /**
    * Returns the file name to use for a particular download file.
@@ -48,7 +48,7 @@ interface TripalDownloadInterface {
    * @return string
    *   The filename for the downloaded file, with or without the full path.
    */
-  public function get_filename(array $options = []);
+  public function getFilename(array $options = []);
 
   /**
    * Returns a human-readable label for the format.
@@ -61,12 +61,25 @@ interface TripalDownloadInterface {
    * @return string
    *   A short label for the format of the file.
    */
-  public function get_format();
+  public function getFormat();
 
   /****************************************************************************
    * @section
    * Getter Methods
    */
+
+  /**
+   * Returns the machine name of this download implementation.
+   *
+   * This is the main way your implementation will be retrieved so make
+   * sure it is unique!
+   *
+   * Example: modulename_toolname
+   *
+   * @return string
+   *   The machine name of this plugin.
+   */
+  public function id();
 
   /**
    * Returns the human-readable name of this download implementation.
