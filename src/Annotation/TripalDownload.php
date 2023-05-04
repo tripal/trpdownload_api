@@ -7,6 +7,8 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines tripal_download annotation object.
  *
+ * @codeCoverageIgnore
+ *
  * @Annotation
  */
 class TripalDownload extends Plugin {

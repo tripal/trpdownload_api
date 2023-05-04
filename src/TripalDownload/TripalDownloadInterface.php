@@ -4,6 +4,8 @@ namespace Drupal\trpdownload_api\TripalDownload;
 
 /**
  * Interface for tripal_download plugins.
+ *
+ * @codeCoverageIgnore
  */
 interface TripalDownloadInterface {
 
