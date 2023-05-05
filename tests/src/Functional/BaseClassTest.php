@@ -42,6 +42,26 @@ class BaseClassTest extends ChadoTestBrowserBase {
     $this->assertInstanceOf(TripalDownloadInterface::class, $plugin,
       "Returned object for $plugin_id is not an instance of TripalDownloadPluginBase.");
 
+    // Check that dependency injection worked properly.
+    // Since the database connection and logger are protected properties, we cannot test them directly.
+    // As such, we will use PHP closures to access these properties for testing.
+    //  -- Create a variable to store a copy of this test object for use within the closure.
+    $that = $this;
+    //  -- Create a closure (i.e. a function tied to a variable) that does not need any parameters.
+    //     Within this function we will want all of the assertions we will use to test the private methods.
+    //     Also, $this within the function will actually be the plugin object that you bind later (mind blown).
+    $assertDependencyInjectionClosure = function ()  use ($that){
+      $that->assertIsObject($this->connection,
+        "The connection object in our plugin was not set properly.");
+      $that->assertIsObject($this->logger,
+        "The connection object in our plugin was not set properly.");
+    };
+    //  -- Now, bind our assertion closure to the $plugin object. This is what makes the plugin available
+    //     inside the function.
+    $doAssertDependencyInjectionClosure = $assertDependencyInjectionClosure->bindTo($plugin, get_class($plugin));
+    //  -- Finally, call our bound closure function to run the assertions on our plugin.
+    $doAssertDependencyInjectionClosure();
+
     // Check getFormat()
     $retrieved = $plugin->getFormat();
     $expected = $expected_annotation['format_label'];

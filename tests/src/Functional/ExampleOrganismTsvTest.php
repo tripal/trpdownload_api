@@ -26,7 +26,7 @@ class ExampleOrganismTsvTest extends ChadoTestBrowserBase {
    * Tests that we can retrieve the annotation details for our
    * example plugin implementations.
    */
-  public function testBaseClass() {
+  public function testExampleOrganismTsvClass() {
 
     $plugin_id = 'example_organism_tsv';
     $expected_annotation = [
