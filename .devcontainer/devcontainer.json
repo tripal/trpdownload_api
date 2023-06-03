@@ -1,0 +1,5 @@
+{
+  "image": "tripalproject/tripaldocker:drupal10.0.x-dev-php8.2-pgsql13",
+  "features": {
+  }
+}
