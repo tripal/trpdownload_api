@@ -13,7 +13,7 @@ use Drupal\trpdownload_api\TripalDownload\TripalDownloadInterface;
  */
 class BasicAnnotationTest extends ChadoTestBrowserBase {
 
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.

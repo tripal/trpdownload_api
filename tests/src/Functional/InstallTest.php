@@ -13,7 +13,7 @@ use Drupal\Tests\tripal_chado\Functional\ChadoTestBrowserBase;
  */
 class InstallTest extends ChadoTestBrowserBase {
 
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
